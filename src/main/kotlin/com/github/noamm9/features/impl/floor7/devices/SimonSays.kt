@@ -19,6 +19,7 @@ import com.github.noamm9.utils.render.RenderContext
 import java.awt.Color
 import kotlinx.coroutines.launch
 import net.minecraft.core.BlockPos
+import net.minecraft.core.Direction
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.level.block.Blocks
 
