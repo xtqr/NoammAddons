@@ -407,11 +407,11 @@ object Render3D {
             maxY: Double,
             maxZ: Double,
             color: Color,
+            removeSide: Direction = Direction.EAST,
             phase: Boolean = false,
             lineWidth: Number = 2.5
     ) {
         val cam = ctx.camera.positionVec
-
         ctx.matrixStack.pushPose()
         ctx.matrixStack.translate(-cam.x, -cam.y, -cam.z)
 
@@ -428,22 +428,43 @@ object Render3D {
         val a = color.alpha / 255f
         val lw = lineWidth.toFloat()
 
-        val mx = minX.toFloat()
-        val my = minY.toFloat()
-        val mz = minZ.toFloat()
-        val Mx = maxX.toFloat()
-        val My = maxY.toFloat()
-        val Mz = maxZ.toFloat()
+        val x1 = minX.toFloat()
+        val y1 = minY.toFloat()
+        val z1 = minZ.toFloat()
+        val x2 = maxX.toFloat()
+        val y2 = maxY.toFloat()
+        val z2 = maxZ.toFloat()
 
-        addLine(buffer, pose, Mx, my, mz, Mx, My, mz, r, g, b, a, lw)
-        addLine(buffer, pose, Mx, my, Mz, Mx, My, Mz, r, g, b, a, lw)
-        addLine(buffer, pose, Mx, My, mz, Mx, My, Mz, r, g, b, a, lw)
-        addLine(buffer, pose, Mx, my, mz, Mx, my, Mz, r, g, b, a, lw)
+        if (removeSide != Direction.DOWN) {
+            if (removeSide != Direction.NORTH)
+                    addLine(buffer, pose, x1, y1, z1, x2, y1, z1, r, g, b, a, lw)
+            if (removeSide != Direction.SOUTH)
+                    addLine(buffer, pose, x1, y1, z2, x2, y1, z2, r, g, b, a, lw)
+            if (removeSide != Direction.WEST)
+                    addLine(buffer, pose, x1, y1, z1, x1, y1, z2, r, g, b, a, lw)
+            if (removeSide != Direction.EAST)
+                    addLine(buffer, pose, x2, y1, z1, x2, y1, z2, r, g, b, a, lw)
+        }
 
-        addLine(buffer, pose, Mx, My, mz, mx, My, mz, r, g, b, a, lw)
-        addLine(buffer, pose, Mx, My, Mz, mx, My, Mz, r, g, b, a, lw)
-        addLine(buffer, pose, Mx, my, mz, mx, my, mz, r, g, b, a, lw)
-        addLine(buffer, pose, Mx, my, Mz, mx, my, Mz, r, g, b, a, lw)
+        if (removeSide != Direction.UP) {
+            if (removeSide != Direction.NORTH)
+                    addLine(buffer, pose, x1, y2, z1, x2, y2, z1, r, g, b, a, lw)
+            if (removeSide != Direction.SOUTH)
+                    addLine(buffer, pose, x1, y2, z2, x2, y2, z2, r, g, b, a, lw)
+            if (removeSide != Direction.WEST)
+                    addLine(buffer, pose, x1, y2, z1, x1, y2, z2, r, g, b, a, lw)
+            if (removeSide != Direction.EAST)
+                    addLine(buffer, pose, x2, y2, z1, x2, y2, z2, r, g, b, a, lw)
+        }
+
+        if (removeSide != Direction.NORTH && removeSide != Direction.WEST)
+                addLine(buffer, pose, x1, y1, z1, x1, y2, z1, r, g, b, a, lw)
+        if (removeSide != Direction.NORTH && removeSide != Direction.EAST)
+                addLine(buffer, pose, x2, y1, z1, x2, y2, z1, r, g, b, a, lw)
+        if (removeSide != Direction.SOUTH && removeSide != Direction.WEST)
+                addLine(buffer, pose, x1, y1, z2, x1, y2, z2, r, g, b, a, lw)
+        if (removeSide != Direction.SOUTH && removeSide != Direction.EAST)
+                addLine(buffer, pose, x2, y1, z2, x2, y2, z2, r, g, b, a, lw)
 
         ctx.matrixStack.popPose()
     }
@@ -453,9 +474,23 @@ object Render3D {
             min: Vec3,
             max: Vec3,
             color: Color,
+            removeSide: Direction = Direction.EAST,
             phase: Boolean = false,
             lineWidth: Number = 2.5
-    ) = renderOpenBoxBounds(ctx, min.x, min.y, min.z, max.x, max.y, max.z, color, phase, lineWidth)
+    ) =
+            renderOpenBoxBounds(
+                    ctx,
+                    min.x,
+                    min.y,
+                    min.z,
+                    max.x,
+                    max.y,
+                    max.z,
+                    color,
+                    removeSide,
+                    phase,
+                    lineWidth
+            )
 
     fun renderString(
             text: String,
