@@ -316,7 +316,8 @@ object SimonSays : Feature("Simon Says Solver") {
         val maxZ = pos.z + 0.7
 
         val fillColor = Color(color.red, color.green, color.blue, (0.7f * 255).toInt())
-        Render3D.renderBoxBounds(
+
+        Render3D.renderOpenBoxBounds(
                 ctx,
                 minX,
                 minY,
@@ -325,10 +326,9 @@ object SimonSays : Feature("Simon Says Solver") {
                 maxY,
                 maxZ,
                 fillColor,
-                fillColor,
-                outline = true,
-                fill = false,
-                phase = true
+                removeSide = Direction.EAST,
+                phase = true,
+                lineWidth = 2.5
         )
     }
 }
