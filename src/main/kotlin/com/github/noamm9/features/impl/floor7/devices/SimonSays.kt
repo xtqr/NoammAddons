@@ -14,37 +14,77 @@ import com.github.noamm9.utils.ThreadUtils
 import com.github.noamm9.utils.WorldUtils
 import com.github.noamm9.utils.dungeons.DungeonListener
 import com.github.noamm9.utils.location.LocationUtils
-import com.github.noamm9.utils.render.RenderContext
 import com.github.noamm9.utils.render.Render3D
+import com.github.noamm9.utils.render.RenderContext
+import java.awt.Color
 import kotlinx.coroutines.launch
 import net.minecraft.core.BlockPos
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.level.block.Blocks
-import java.awt.Color
 
-object SimonSays: Feature("Simon Says Solver") {
-    private val ssSkip by ToggleSetting("SS skip Compatibility").withDescription("Always assume at the start that you perfectly SS skip").section("Options")
-    private val blockWrongClicks by ToggleSetting("Block Wrong Clicks").withDescription("Blocks clicks if you aren't looking at the correct button. &eSneak to override.")
+object SimonSays : Feature("Simon Says Solver") {
+    private val ssSkip by
+            ToggleSetting("SS skip Compatibility")
+                    .withDescription("Always assume at the start that you perfectly SS skip")
+                    .section("Options")
+    private val blockWrongClicks by
+            ToggleSetting("Block Wrong Clicks")
+                    .withDescription(
+                            "Blocks clicks if you aren't looking at the correct button. &eSneak to override."
+                    )
 
-    private val color1 by ColorSetting("First Color", Color.GREEN).withDescription("Color of the first button.").section("Colors")
-    private val color2 by ColorSetting("Second Color", Color.YELLOW).withDescription("Color of the second button.")
-    private val color3 by ColorSetting("Other Color", Color.RED).withDescription("Color of the rest of the buttons.")
+    private val color1 by
+            ColorSetting("First Color", Color.GREEN)
+                    .withDescription("Color of the first button.")
+                    .section("Colors")
+    private val color2 by
+            ColorSetting("Second Color", Color.YELLOW)
+                    .withDescription("Color of the second button.")
+    private val color3 by
+            ColorSetting("Other Color", Color.RED)
+                    .withDescription("Color of the rest of the buttons.")
 
-    //#if CHEAT
-    private val autoStart by ToggleSetting("Auto Start", false).withDescription("Automatically starts the device when it can be started.").section("Auto")
-    private val startClicks by SliderSetting("Start Clicks", 3, 1, 10, 1).withDescription("Amount of clicks to start the device.").showIf { autoStart.value }
-    private val startClickDelay by SliderSetting("Start Click Delay", 3, 1, 25, 1).withDescription("Delay in ticks between each start click.").showIf { autoStart.value }
+    // #if CHEAT
+    private val autoStart by
+            ToggleSetting("Auto Start", false)
+                    .withDescription("Automatically starts the device when it can be started.")
+                    .section("Auto")
+    private val startClicks by
+            SliderSetting("Start Clicks", 3, 1, 10, 1)
+                    .withDescription("Amount of clicks to start the device.")
+                    .showIf { autoStart.value }
+    private val startClickDelay by
+            SliderSetting("Start Click Delay", 3, 1, 25, 1)
+                    .withDescription("Delay in ticks between each start click.")
+                    .showIf { autoStart.value }
 
-    private val autoSS by ToggleSetting("Auto SS").withDescription("Automatically does the device.").showIf { NoammAddons.debugFlags.contains("autoss") }
-    private val autoSSDelay by SliderSetting("Auto SS delay", 3, 1, 10, 1)
-        .withDescription("Delay in Server ticks.").showIf { autoSS.value && NoammAddons.debugFlags.contains("autoss") }
-    //#endif
+    private val autoSS by
+            ToggleSetting("Auto SS").withDescription("Automatically does the device.").showIf {
+                NoammAddons.debugFlags.contains("autoss")
+            }
+    private val autoSSDelay by
+            SliderSetting("Auto SS delay", 3, 1, 10, 1)
+                    .withDescription("Delay in Server ticks.")
+                    .showIf { autoSS.value && NoammAddons.debugFlags.contains("autoss") }
+    // #endif
 
     private val alertsEnabled by ToggleSetting("Alerts Enabled", true).section("Alerts")
-    private val sendChat by ToggleSetting("SS Break Alert", true).showIf { alertsEnabled.value }.withDescription("Sends in party chat when the device got reset")
-    private val sendRestartChat by ToggleSetting("Send Restart Chat", true).showIf { alertsEnabled.value }.withDescription("Sends a message in party chat when you restart the device")
-    private val alertSound by ToggleSetting("Alert Sound", true).showIf { alertsEnabled.value }.withDescription("Plays a sound when the device fails")
-    private val showTitle by ToggleSetting("Show Title", true).showIf { alertsEnabled.value }.withDescription("Shows a title when the device fails")
+    private val sendChat by
+            ToggleSetting("SS Break Alert", true)
+                    .showIf { alertsEnabled.value }
+                    .withDescription("Sends in party chat when the device got reset")
+    private val sendRestartChat by
+            ToggleSetting("Send Restart Chat", true)
+                    .showIf { alertsEnabled.value }
+                    .withDescription("Sends a message in party chat when you restart the device")
+    private val alertSound by
+            ToggleSetting("Alert Sound", true)
+                    .showIf { alertsEnabled.value }
+                    .withDescription("Plays a sound when the device fails")
+    private val showTitle by
+            ToggleSetting("Show Title", true)
+                    .showIf { alertsEnabled.value }
+                    .withDescription("Shows a title when the device fails")
 
     private val solution = ArrayList<BlockPos>()
     private var lastExisted = false
@@ -63,11 +103,11 @@ object SimonSays: Feature("Simon Says Solver") {
     private var canBreak = false
     private var wasBroken = false
 
-    private val obsidians = (120 .. 123).flatMap { y -> (92 .. 95).map { z -> BlockPos(111, y, z) } }
-    private val buttons = (120 .. 123).flatMap { y -> (92 .. 95).map { z -> BlockPos(110, y, z) } }
+    private val obsidians = (120..123).flatMap { y -> (92..95).map { z -> BlockPos(111, y, z) } }
+    private val buttons = (120..123).flatMap { y -> (92..95).map { z -> BlockPos(110, y, z) } }
 
-    private val deviceRegex = Regex("(.+) (activated|completed) a (terminal|device|lever)! \\((\\d)/(\\d)\\)")
-
+    private val deviceRegex =
+            Regex("(.+) (activated|completed) a (terminal|device|lever)! \\((\\d)/(\\d)\\)")
 
     override fun init() {
         register<WorldChangeEvent> {
@@ -75,60 +115,66 @@ object SimonSays: Feature("Simon Says Solver") {
             reset()
         }
 
-        //#if CHEAT
+        // #if CHEAT
         register<ChatMessageEvent> {
-            if (! autoStart.value) return@register
+            if (!autoStart.value) return@register
             if (LocationUtils.F7Phase != 3) return@register
-            if (! event.unformattedText.matches(startRegex)) return@register
-            if (PlayerUtils.getSelectionBlock() == startButton) repeat(startClicks.value) {
-                ThreadUtils.scheduledTask(it * startClickDelay.value) {
-                    PlayerUtils.rightClick()
-                }
-            }
+            if (!event.unformattedText.matches(startRegex)) return@register
+            if (PlayerUtils.getSelectionBlock() == startButton)
+                    repeat(startClicks.value) {
+                        ThreadUtils.scheduledTask(it * startClickDelay.value) {
+                            PlayerUtils.rightClick()
+                        }
+                    }
         }
-        //#endif
+        // #endif
 
         register<TickEvent.Start> {
             if (LocationUtils.F7Phase != 3) return@register
             val buttonsExist = WorldUtils.getBlockAt(buttonCheckPos) == Blocks.STONE_BUTTON
 
-            if (buttonsExist && ! lastExisted) {
+            if (buttonsExist && !lastExisted) {
                 allObi = true
 
-                for (dy in 0 .. 3) for (dz in 0 .. 3) {
+                for (dy in 0..3) for (dz in 0..3) {
                     val pos = startPos.offset(0, dy, dz)
                     if (WorldUtils.getBlockAt(pos) != Blocks.OBSIDIAN) {
                         allObi = false
                     }
                 }
 
-
                 if (allObi) {
                     lastExisted = true
                     skipOver = true
 
-                    //#if CHEAT
-                    if (autoSS.value && NoammAddons.debugFlags.contains("autoss")) scope.launch {
-                        val list = solution.toList()
-                        for (pos in list) {
-                            val targetTick = DungeonListener.currentTime + autoSSDelay.value
-                            PlayerUtils.rotateSmoothly(pos.west().center, autoSSDelay.value * 50L)
-                            if (list.first() == pos) PlayerUtils.rightClick()
+                    // #if CHEAT
+                    if (autoSS.value && NoammAddons.debugFlags.contains("autoss"))
+                            scope.launch {
+                                val list = solution.toList()
+                                for (pos in list) {
+                                    val targetTick = DungeonListener.currentTime + autoSSDelay.value
+                                    PlayerUtils.rotateSmoothly(
+                                            pos.west().center,
+                                            autoSSDelay.value * 50L
+                                    )
+                                    if (list.first() == pos) PlayerUtils.rightClick()
 
-                            while (DungeonListener.currentTime < targetTick) Thread.sleep(10)
-                            if (list.first() != pos) PlayerUtils.rightClick()
-                        }
-                    }
-                    //#endif
+                                    while (DungeonListener.currentTime < targetTick) Thread.sleep(
+                                            10
+                                    )
+                                    if (list.first() != pos) PlayerUtils.rightClick()
+                                }
+                            }
+                    // #endif
                 }
             }
 
-            if (! buttonsExist && lastExisted) {
+            if (!buttonsExist && lastExisted) {
                 lastExisted = false
                 solution.clear()
             }
 
-            for (dy in 0 .. 3) for (dz in 0 .. 3) {
+            for (dy in 0..3) for (dz in 0..3) {
                 val pos = startPos.offset(0, dy, dz)
                 val block = WorldUtils.getBlockAt(pos)
                 if (block != Blocks.SEA_LANTERN || solution.contains(pos)) continue
@@ -136,7 +182,7 @@ object SimonSays: Feature("Simon Says Solver") {
                 if (solution.contains(pos)) solution.remove(pos)
                 solution.add(pos)
 
-                if (! skipOver && ssSkip.value && solution.size == 3) {
+                if (!skipOver && ssSkip.value && solution.size == 3) {
                     solution.removeAt(0)
                 }
             }
@@ -147,13 +193,14 @@ object SimonSays: Feature("Simon Says Solver") {
             if (solution.isEmpty()) return@register
 
             for (i in solution.indices) {
-                val color = when (i) {
-                    0 -> color1
-                    1 -> color2
-                    else -> color3
-                }.value
+                val color =
+                        when (i) {
+                            0 -> color1
+                            1 -> color2
+                            else -> color3
+                        }.value
 
-                renderSSBox(event.ctx, solution[i].west(), color)
+                renderSSBox(event.ctx, solution[i], color)
             }
         }
 
@@ -175,20 +222,19 @@ object SimonSays: Feature("Simon Says Solver") {
             val expected = solution.firstOrNull() ?: return
 
             if (checkPos != expected) {
-                if (blockWrongClicks.value && ! mc.player !!.isCrouching) return event.cancel()
+                if (blockWrongClicks.value && !mc.player!!.isCrouching) return event.cancel()
 
                 if (solution.size == 3 && checkPos == solution[1]) {
                     for (i in 1 downTo 0) solution.removeAt(i)
                 }
-            }
-            else solution.remove(expected)
+            } else solution.remove(expected)
         }
 
         register<PlayerInteractEvent.RIGHT_CLICK.BLOCK> { handleClick(event, event.pos) }
         register<PlayerInteractEvent.LEFT_CLICK.BLOCK> { handleClick(event, event.pos) }
 
         register<ChatMessageEvent> {
-            if (! alertsEnabled.value) return@register
+            if (!alertsEnabled.value) return@register
             if (LocationUtils.F7Phase != 3) return@register
             val msg = event.unformattedText
 
@@ -198,13 +244,14 @@ object SimonSays: Feature("Simon Says Solver") {
                 return@register
             }
 
-            if (! serverTickListener.isRegistered()) return@register
+            if (!serverTickListener.isRegistered()) return@register
 
-            val (_, _, type, completedStr, _) = deviceRegex.find(msg)?.destructured ?: return@register
+            val (_, _, type, completedStr, _) =
+                    deviceRegex.find(msg)?.destructured ?: return@register
             val completed = completedStr.toIntOrNull() ?: 0
 
             when (type) {
-                "terminal", "lever" -> thingsDone ++
+                "terminal", "lever" -> thingsDone++
                 "device" -> {
                     if ((thingsDone + 1) >= completed) {
                         serverTickListener.unregister()
@@ -214,32 +261,36 @@ object SimonSays: Feature("Simon Says Solver") {
         }
     }
 
-    val serverTickListener = EventBus.register<TickEvent.Server> {
-        ticks --
+    val serverTickListener =
+            EventBus.register<TickEvent.Server> {
+                        ticks--
 
-        if (obsidians.any { WorldUtils.getBlockAt(it) != Blocks.OBSIDIAN }) {
-            ticks = 12
-            canBreak = true
+                        if (obsidians.any { WorldUtils.getBlockAt(it) != Blocks.OBSIDIAN }) {
+                            ticks = 12
+                            canBreak = true
 
-            if (wasBroken) {
-                wasBroken = false
-                if (sendRestartChat.value) ChatUtils.sendCommand("pc SS Started Again!")
-                if (showTitle.value) ChatUtils.showTitle("§a§l§nSS Started!")
-            }
+                            if (wasBroken) {
+                                wasBroken = false
+                                if (sendRestartChat.value)
+                                        ChatUtils.sendCommand("pc SS Started Again!")
+                                if (showTitle.value) ChatUtils.showTitle("§a§l§nSS Started!")
+                            }
 
-            return@register
-        }
+                            return@register
+                        }
 
-        if (ticks > 0 || ! canBreak) return@register
-        if (! buttons.all { pos -> WorldUtils.getBlockAt(pos) == Blocks.AIR }) return@register
+                        if (ticks > 0 || !canBreak) return@register
+                        if (!buttons.all { pos -> WorldUtils.getBlockAt(pos) == Blocks.AIR })
+                                return@register
 
-        canBreak = false
-        wasBroken = true
+                        canBreak = false
+                        wasBroken = true
 
-        if (sendChat.value) ChatUtils.sendCommand("pc SS Broke!")
-        if (alertSound.value) mc.player?.playSound(SoundEvents.ANVIL_LAND, 5f, 0f)
-        if (showTitle.value) ChatUtils.showTitle("§c§l§nSS BROKE!")
-    }.unregister()
+                        if (sendChat.value) ChatUtils.sendCommand("pc SS Broke!")
+                        if (alertSound.value) mc.player?.playSound(SoundEvents.ANVIL_LAND, 5f, 0f)
+                        if (showTitle.value) ChatUtils.showTitle("§c§l§nSS BROKE!")
+                    }
+                    .unregister()
 
     private fun resetSolver() {
         lastExisted = false
@@ -257,29 +308,27 @@ object SimonSays: Feature("Simon Says Solver") {
     }
 
     private fun renderSSBox(ctx: RenderContext, pos: BlockPos, color: Color) {
-        val w = 0.4 / 2.0
-        val h = 0.26 / 2.0
-
-        val cx = pos.x + 1.0
-        val cy = pos.y + 0.5
-        val cz = pos.z + 0.5
-
-        val minX = cx - 0.2
-        val minY = cy - h
-        val maxY = cy + h
-        val minZ = cz - w
-        val maxZ = cz + w
+        val minX = pos.x - 0.15
+        val minY = pos.y + 0.37
+        val minZ = pos.z + 0.3
+        val maxX = pos.x + 0.05
+        val maxY = pos.y + 0.63
+        val maxZ = pos.z + 0.7
 
         val fillColor = Color(color.red, color.green, color.blue, (0.7f * 255).toInt())
         Render3D.renderBoxBounds(
-            ctx,
-            minX, minY, minZ,
-            cx, maxY, maxZ,
-            fillColor,
-            fillColor,
-            outline = false,
-            fill = true,
-            phase = true
+                ctx,
+                minX,
+                minY,
+                minZ,
+                maxX,
+                maxY,
+                maxZ,
+                fillColor,
+                fillColor,
+                outline = true,
+                fill = false,
+                phase = true
         )
     }
 }
