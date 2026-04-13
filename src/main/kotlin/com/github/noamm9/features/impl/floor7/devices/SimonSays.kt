@@ -318,16 +318,11 @@ object SimonSays : Feature("Simon Says Solver") {
 
         val fillColor = Color(color.red, color.green, color.blue, (0.7f * 255).toInt())
 
-        Render3D.renderOpenBoxBounds(
-                ctx,
-                minX,
-                minY,
-                minZ,
-                maxX,
-                maxY,
-                maxZ,
-                fillColor,
-                removeSide = Direction.EAST,
+        Render3D.renderButtonFaceOutline(
+                ctx = ctx,
+                pos = pos,
+                direction = Direction.WEST,
+                color = fillColor,
                 phase = true,
                 lineWidth = 2.5
         )
