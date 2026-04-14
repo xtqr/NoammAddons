@@ -496,14 +496,19 @@ object Render3D {
         fun renderButtonFaceOutline(
                 ctx: RenderContext,
                 pos: BlockPos,
-                direction: Direction,
+                facing: Direction,
                 color: Color,
                 phase: Boolean = false,
                 lineWidth: Number = 2.5
         ) {
                 val cam = ctx.camera.positionVec
                 ctx.matrixStack.pushPose()
-                ctx.matrixStack.translate(-cam.x, -cam.y, -cam.z)
+
+                ctx.matrixStack.translate(
+                        pos.x.toDouble() - cam.x,
+                        pos.y.toDouble() - cam.y,
+                        pos.z.toDouble() - cam.z
+                )
 
                 val buffer =
                         ctx.consumers.getBuffer(
@@ -518,99 +523,25 @@ object Render3D {
                 val a = color.alpha / 255f
                 val lw = lineWidth.toFloat()
 
-                val x = pos.x.toFloat()
-                val y = pos.y.toFloat()
-                val z = pos.z.toFloat()
+                val w1 = 5f / 16f
+                val w2 = 11f / 16f
+                val h1 = 6f / 16f
+                val h2 = 10f / 16f
 
-                val x1: Float
-                val y1: Float
-                val z1: Float
-                val x2: Float
-                val y2: Float
-                val z2: Float
-                val x3: Float
-                val y3: Float
-                val z3: Float
-                val x4: Float
-                val y4: Float
-                val z4: Float
+                if (facing == Direction.WEST) {
+                        val fx = 14f / 16f
+                        val bx = 1f
 
-                val wMin = 5f / 16f
-                val wMax = 11f / 16f
-                val hMin = 6f / 16f
-                val hMax = 10f / 16f
+                        addLine(buffer, pose, fx, h1, w1, fx, h1, w2, r, g, b, a, lw)
+                        addLine(buffer, pose, fx, h1, w2, fx, h2, w2, r, g, b, a, lw)
+                        addLine(buffer, pose, fx, h2, w2, fx, h2, w1, r, g, b, a, lw)
+                        addLine(buffer, pose, fx, h2, w1, fx, h1, w1, r, g, b, a, lw)
 
-                when (direction) {
-                        Direction.NORTH -> {
-                                val fZ = 14f / 16f
-                                x1 = x + wMin
-                                y1 = y + hMin
-                                z1 = z + fZ
-                                x2 = x + wMax
-                                y2 = y + hMin
-                                z2 = z + fZ
-                                x3 = x + wMax
-                                y3 = y + hMax
-                                z3 = z + fZ
-                                x4 = x + wMin
-                                y4 = y + hMax
-                                z4 = z + fZ
-                        }
-                        Direction.SOUTH -> {
-                                val fZ = 2f / 16f
-                                x1 = x + wMin
-                                y1 = y + hMin
-                                z1 = z + fZ
-                                x2 = x + wMax
-                                y2 = y + hMin
-                                z2 = z + fZ
-                                x3 = x + wMax
-                                y3 = y + hMax
-                                z3 = z + fZ
-                                x4 = x + wMin
-                                y4 = y + hMax
-                                z4 = z + fZ
-                        }
-                        Direction.WEST -> {
-                                val fX = 14f / 16f
-                                x1 = x + fX
-                                y1 = y + hMin
-                                z1 = z + wMin
-                                x2 = x + fX
-                                y2 = y + hMin
-                                z2 = z + wMax
-                                x3 = x + fX
-                                y3 = y + hMax
-                                z3 = z + wMax
-                                x4 = x + fX
-                                y4 = y + hMax
-                                z4 = z + wMin
-                        }
-                        Direction.EAST -> {
-                                val fX = 2f / 16f
-                                x1 = x + fX
-                                y1 = y + hMin
-                                z1 = z + wMin
-                                x2 = x + fX
-                                y2 = y + hMin
-                                z2 = z + wMax
-                                x3 = x + fX
-                                y3 = y + hMax
-                                z3 = z + wMax
-                                x4 = x + fX
-                                y4 = y + hMax
-                                z4 = z + wMin
-                        }
-                        else -> {
-                                ctx.matrixStack.popPose()
-                                return
-                        }
+                        addLine(buffer, pose, fx, h1, w1, bx, h1, w1, r, g, b, a, lw)
+                        addLine(buffer, pose, fx, h1, w2, bx, h1, w2, r, g, b, a, lw)
+                        addLine(buffer, pose, fx, h2, w1, bx, h2, w1, r, g, b, a, lw)
+                        addLine(buffer, pose, fx, h2, w2, bx, h2, w2, r, g, b, a, lw)
                 }
-
-                addLine(buffer, pose, x1, y1, z1, x2, y2, z2, r, g, b, a, lw)
-                addLine(buffer, pose, x2, y2, z2, x3, y3, z3, r, g, b, a, lw)
-                addLine(buffer, pose, x3, y3, z3, x4, y4, z4, r, g, b, a, lw)
-                addLine(buffer, pose, x4, y4, z4, x1, y1, z1, r, g, b, a, lw)
 
                 ctx.matrixStack.popPose()
         }
