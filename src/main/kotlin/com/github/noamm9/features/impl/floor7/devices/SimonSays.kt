@@ -309,20 +309,13 @@ object SimonSays : Feature("Simon Says Solver") {
     }
 
     private fun renderSSBox(ctx: RenderContext, pos: BlockPos, color: Color) {
-        val minX = pos.x - 0.15
-        val minY = pos.y + 0.37
-        val minZ = pos.z + 0.3
-        val maxX = pos.x + 0.05
-        val maxY = pos.y + 0.63
-        val maxZ = pos.z + 0.7
-
-        val fillColor = Color(color.red, color.green, color.blue, (0.7f * 255).toInt())
+        val boxColor = Color(color.red, color.green, color.blue, (0.7f * 255).toInt())
 
         Render3D.renderButtonFaceOutline(
                 ctx = ctx,
                 pos = pos,
-                direction = Direction.WEST,
-                color = fillColor,
+                facing = Direction.WEST,
+                color = boxColor,
                 phase = true,
                 lineWidth = 2.5
         )
