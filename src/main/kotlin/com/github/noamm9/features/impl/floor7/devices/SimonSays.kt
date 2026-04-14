@@ -311,9 +311,11 @@ object SimonSays : Feature("Simon Says Solver") {
     private fun renderSSBox(ctx: RenderContext, pos: BlockPos, color: Color) {
         val boxColor = Color(color.red, color.green, color.blue, (0.7f * 255).toInt())
 
+        val fixedPos = BlockPos(pos.x - 1, pos.y, pos.z) // button is on wall, not inside the block
+
         Render3D.renderButtonFaceOutline(
                 ctx = ctx,
-                pos = pos,
+                pos = fixedPos,
                 facing = Direction.WEST,
                 color = boxColor,
                 phase = true,
