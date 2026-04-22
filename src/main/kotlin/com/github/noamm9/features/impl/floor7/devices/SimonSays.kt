@@ -18,6 +18,7 @@ import com.github.noamm9.utils.render.Render3D
 import com.github.noamm9.utils.render.RenderContext
 import java.awt.Color
 import kotlinx.coroutines.launch
+import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.sounds.SoundEvents
@@ -260,6 +261,16 @@ object SimonSays : Feature("Simon Says Solver") {
                 }
             }
         }
+
+        WorldRenderEvents.BEFORE_BLOCK_OUTLINE.register { _, outlineContext ->
+            val pos = outlineContext.pos
+
+            if (pos.x == 110 && pos.y in 120..123 && pos.z in 92..95) {
+                return@register false
+            }
+
+            true
+        }
     }
 
     val serverTickListener =
@@ -311,16 +322,21 @@ object SimonSays : Feature("Simon Says Solver") {
     private fun renderSSBox(ctx: RenderContext, pos: BlockPos, color: Color) {
         val boxColor = Color(color.red, color.green, color.blue, (0.7f * 255).toInt())
 
-        val fixedPos = BlockPos(pos.x - 1, pos.y, pos.z) // button is on wall, not inside the block
+        val buttonPos = pos.west()
 
         Render3D.renderButtonFaceOutline(
                 ctx = ctx,
-                pos = fixedPos,
+                pos = buttonPos,
                 facing = Direction.WEST,
                 color = boxColor,
-                phase = true,
                 lineWidth = 2.5
         )
+    }
+
+    fun isSimonSaysButton(pos: BlockPos): Boolean {
+        if (LocationUtils.F7Phase != 3) return false
+
+        return pos.x == 110 && pos.y in 120..123 && pos.z in 92..95
     }
 }
 

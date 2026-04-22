@@ -498,7 +498,6 @@ object Render3D {
                 pos: BlockPos,
                 facing: Direction,
                 color: Color,
-                phase: Boolean = false,
                 lineWidth: Number = 2.5
         ) {
                 val cam = ctx.camera.positionVec
@@ -510,11 +509,7 @@ object Render3D {
                         pos.z.toDouble() - cam.z
                 )
 
-                val buffer =
-                        ctx.consumers.getBuffer(
-                                if (phase) NoammRenderLayers.LINES_THROUGH_WALLS
-                                else NoammRenderLayers.LINES
-                        )
+                val buffer = ctx.consumers.getBuffer(NoammRenderLayers.LINES)
                 val pose = ctx.matrixStack.last()
 
                 val r = color.red / 255f
@@ -523,13 +518,13 @@ object Render3D {
                 val a = color.alpha / 255f
                 val lw = lineWidth.toFloat()
 
-                val w1 = 5f / 16f
-                val w2 = 11f / 16f
-                val h1 = 6f / 16f
-                val h2 = 10f / 16f
+                val w1 = (5f / 16f)
+                val w2 = (11f / 16f)
+                val h1 = (6f / 16f)
+                val h2 = (10f / 16f)
 
                 if (facing == Direction.WEST) {
-                        val fx = 14f / 16f
+                        val fx = (14f / 16f)
                         val bx = 1f
 
                         addLine(buffer, pose, fx, h1, w1, fx, h1, w2, r, g, b, a, lw)
