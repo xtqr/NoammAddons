@@ -31,8 +31,6 @@ import java.io.FileWriter
 import java.util.concurrent.*
 
 object DungeonWaypoints: Feature("Add a custom waypoint with /ndw add while looking at a block") {
-    private const val MAX_BAT_MATCH_DISTANCE_SQ = 144.0
-
     val secretWaypoints by ToggleSetting("Secret Waypoints").section("Secret Waypoints")
     val mode by DropdownSetting("Mode", 0, listOf("Fill", "Outline", "Filled Outline"))
     val phase by ToggleSetting("See Through Walls", true)
@@ -42,7 +40,7 @@ object DungeonWaypoints: Feature("Add a custom waypoint with /ndw add while look
     val chestColor by ColorSetting("Chest Color", Color.MAGENTA, false).section("Colors")
     val itemColor by ColorSetting("Item Color", Utils.favoriteColor, false)
     val batColor by ColorSetting("Bat Color", Color.GREEN, false)
-    val essanceColor by ColorSetting("Essance Color", Color.BLACK, false)
+    val essanceColor by ColorSetting("Essence Color", Color.BLACK, false)
     val keyColor by ColorSetting("Redstone Key Color", Color.RED, false)
 
     data class DungeonWaypoint(val pos: BlockPos, val color: Color, val filled: Boolean, val outline: Boolean, val phase: Boolean)
