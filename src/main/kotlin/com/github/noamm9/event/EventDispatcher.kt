@@ -76,7 +76,7 @@ object EventDispatcher {
             }
             else if (event.packet is ClientboundSoundPacket) {
                 if (! LocationUtils.inDungeon || LocationUtils.inBoss) return@register
-                if (! event.packet.sound.value().equalsOneOf(SoundEvents.BAT_HURT, SoundEvents.BAT_DEATH)) return@register
+                if (event.packet.sound.value() != SoundEvents.BAT_DEATH) return@register
 
                 EventBus.post(DungeonEvent.SecretEvent(
                     SecretType.BAT,
