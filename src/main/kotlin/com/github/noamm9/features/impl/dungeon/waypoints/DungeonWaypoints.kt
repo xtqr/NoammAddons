@@ -99,18 +99,22 @@ object DungeonWaypoints: Feature("Add a custom waypoint with /ndw add while look
             if (! secretWaypoints.value || currentSecrets.isEmpty()) return@register
             if (event.type == SecretType.LEVER) return@register
 
-            val maxDistance = when (event.type) {
-                SecretType.ITEM -> 25
-                SecretType.BAT -> 144
-                else -> Int.MAX_VALUE
-            }
+            val special = setOf(SecretType.BAT, SecretType.ITEM)
+            val target = if (event.type !in special) currentSecrets.find { it.pos == event.pos }
+            else {
+                val maxDistance = when (event.type) {
+                    SecretType.ITEM -> 25
+                    SecretType.BAT -> 144
+                    else -> Int.MAX_VALUE
+                }
 
-            val target = currentSecrets.asSequence()
-                .filter { it.type == event.type }
-                .map { it to it.pos.distSqr(event.pos) }
-                .minByOrNull { it.second }
-                ?.takeIf { it.second <= maxDistance }
-                ?.first
+                currentSecrets.asSequence()
+                    .filter { it.type == event.type }
+                    .map { it to it.pos.distSqr(event.pos) }
+                    .minByOrNull { it.second }
+                    ?.takeIf { it.second <= maxDistance }
+                    ?.first
+            }
 
             target?.let(currentSecrets::remove)
         }
