@@ -18,24 +18,19 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(LavaFogEnvironment.class)
 public abstract class MixinLavaFogEnvironment {
-
-    // WaterFogEnvironment holds no mutable state; all methods operate solely on their
-    // parameters. Minecraft rendering runs on a single thread so sharing this instance is safe.
     @Unique
     private static final WaterFogEnvironment WATER_FOG = new WaterFogEnvironment();
 
     @Inject(method = "setupFog", at = @At("HEAD"), cancellable = true)
     private void hookSetupFog(FogData fog, Entity entity, BlockPos pos, ClientLevel level, float renderDistance, DeltaTracker deltaTracker, CallbackInfo ci) {
-        if (LavaToWater.INSTANCE.enabled) {
-            WATER_FOG.setupFog(fog, entity, pos, level, renderDistance, deltaTracker);
-            ci.cancel();
-        }
+        if (!LavaToWater.INSTANCE.enabled) return;
+        WATER_FOG.setupFog(fog, entity, pos, level, renderDistance, deltaTracker);
+        ci.cancel();
     }
 
     @Inject(method = "getBaseColor", at = @At("HEAD"), cancellable = true)
     private void hookGetBaseColor(ClientLevel level, Camera camera, int renderDistance, float partialTicks, CallbackInfoReturnable<Integer> cir) {
-        if (LavaToWater.INSTANCE.enabled) {
-            cir.setReturnValue(WATER_FOG.getBaseColor(level, camera, renderDistance, partialTicks));
-        }
+        if (!LavaToWater.INSTANCE.enabled) return;
+        cir.setReturnValue(WATER_FOG.getBaseColor(level, camera, renderDistance, partialTicks));
     }
 }
