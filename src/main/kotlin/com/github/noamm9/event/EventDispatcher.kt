@@ -10,7 +10,6 @@ import com.github.noamm9.utils.dungeons.DungeonUtils.isSecret
 import com.github.noamm9.utils.dungeons.enums.SecretType
 import com.github.noamm9.utils.dungeons.map.core.UniqueRoom
 import com.github.noamm9.utils.dungeons.map.utils.ScanUtils
-import com.github.noamm9.utils.equalsOneOf
 import com.github.noamm9.utils.location.LocationUtils
 import com.github.noamm9.utils.render.RenderContext
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents
@@ -76,7 +75,7 @@ object EventDispatcher {
             }
             else if (event.packet is ClientboundSoundPacket) {
                 if (! LocationUtils.inDungeon || LocationUtils.inBoss) return@register
-                if (! event.packet.sound.value().equalsOneOf(SoundEvents.BAT_HURT, SoundEvents.BAT_DEATH)) return@register
+                if (event.packet.sound.value() != SoundEvents.BAT_DEATH) return@register
 
                 EventBus.post(DungeonEvent.SecretEvent(
                     SecretType.BAT,
