@@ -31,7 +31,6 @@ import java.io.FileWriter
 import java.util.concurrent.*
 
 object DungeonWaypoints: Feature("Add a custom waypoint with /ndw add while looking at a block") {
-    private const val MAX_ITEM_MATCH_DISTANCE_SQ = 25.0
     private const val MAX_BAT_MATCH_DISTANCE_SQ = 144.0
 
     val secretWaypoints by ToggleSetting("Secret Waypoints").section("Secret Waypoints")
@@ -99,24 +98,21 @@ object DungeonWaypoints: Feature("Add a custom waypoint with /ndw add while look
         }
 
         register<DungeonEvent.SecretEvent> {
-            if (!secretWaypoints.value || currentSecrets.isEmpty()) return@register
+            if (! secretWaypoints.value || currentSecrets.isEmpty()) return@register
             if (event.type == SecretType.LEVER) return@register
 
-            val distinctTypes = setOf(SecretType.BAT, SecretType.ITEM)
-            val target = if (event.type in distinctTypes) {
-                val maxDistance = when (event.type) {
-                    SecretType.ITEM -> MAX_ITEM_MATCH_DISTANCE_SQ
-                    SecretType.BAT -> MAX_BAT_MATCH_DISTANCE_SQ
-                    else -> return@register
-                }
+            val maxDistance = when (event.type) {
+                SecretType.ITEM -> 25
+                SecretType.BAT -> 144
+                else -> Int.MAX_VALUE
+            }
 
-                currentSecrets
-                    .filter { it.type == event.type }
-                    .map { it to it.pos.distSqr(event.pos) }
-                    .minByOrNull { it.second }
-                    ?.takeIf { it.second <= maxDistance }
-                    ?.first
-            } else currentSecrets.find { it.pos == event.pos }
+            val target = currentSecrets.asSequence()
+                .filter { it.type == event.type }
+                .map { it to it.pos.distSqr(event.pos) }
+                .minByOrNull { it.second }
+                ?.takeIf { it.second <= maxDistance }
+                ?.first
 
             target?.let(currentSecrets::remove)
         }
